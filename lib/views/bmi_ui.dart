@@ -9,6 +9,15 @@ class BmiUI extends StatefulWidget {
 }
 
 class _BmiUIState extends State<BmiUI> {
+
+  // สร้างตัวควบคุมสำหรับ TextField เพื่อเช็คผู้ใช้กรอกข้อมูลหรือไม่
+  TextEditingController weightController = TextEditingController();
+  TextEditingController heightController = TextEditingController();
+
+  // ฟังก์ชันคำนวณ BMI และแปลผลลัพธ์
+  String Show_bmi = '0.00';
+  String Show_result = 'การแปลผล';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,7 +37,9 @@ class _BmiUIState extends State<BmiUI> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              SizedBox(height: 20,),
+              SizedBox(
+                height: 20,
+              ),
               // รูปภาพ BMI
               Image.asset(
                 'assets/images/bmi.png',
@@ -47,6 +58,7 @@ class _BmiUIState extends State<BmiUI> {
                   ),
                   SizedBox(height: 5),
                   TextField(
+                    controller: weightController, // เชื่อมต่อ TextField กับตัวควบคุม
                     keyboardType: TextInputType.number, // เปิดคีย์บอร์ดตัวเลข
                     inputFormatters: [
                       FilteringTextInputFormatter
@@ -65,18 +77,19 @@ class _BmiUIState extends State<BmiUI> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'ส่วนสูง (cm.)',
                     style: TextStyle(fontSize: 15),
                   ),
-                  const SizedBox(height: 5),
+                  SizedBox(height: 5),
                   TextField(
+                    controller: heightController, // เชื่อมต่อ TextField กับตัวควบคุม
                     keyboardType: TextInputType.number, // เปิดคีย์บอร์ดตัวเลข
                     inputFormatters: [
                       FilteringTextInputFormatter
                           .digitsOnly, // บังคับให้พิมพ์ได้เฉพาะตัวเลข 0-9 เท่านั้น
                     ],
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       hintText: 'กรอกส่วนสูงของคุณ',
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.all(Radius.circular(8))),
@@ -87,7 +100,38 @@ class _BmiUIState extends State<BmiUI> {
               SizedBox(height: 30),
               // ปุ่มคำนวณ BMI
               ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  // validate input ตรวจสอบว่าผู้ใช้กรอกข้อมูลหรือไม่
+                  if (weightController.text.isEmpty || heightController.text.isEmpty == true) {
+                    //ใช้ SnackBar แสดงข้อความแจ้งเตือน
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text('กรุณากรอกและน้ำหนักและส่วนสูง!'),
+                      backgroundColor: Colors.red,
+                      duration: Duration(seconds: 2),
+                    ));
+                    return; // ออกจากฟังก์ชันหากข้อมูลไม่ครบ
+                  }
+                  // ดึงค่าที่ผู้ใช้กรอกมาและแปลงเป็น double
+                  double weight = double.parse(weightController.text);
+                  double height = double.parse(heightController.text);
+                  double bmi = weight / ((height / 100) * (height / 100)); // แปลงส่วนสูงจาก cm เป็น m
+                 // นำค่า BMI ไปแสดงผลลัพธ์ //***โค้ดคำสั่งที่มีผลต่อการแสดงผลต้องเขียนอยู่ภายใต้คำสั่ง setState()***/
+                  setState(() {
+                    // นำตัวแปร bmi ไปกำหนดค่าให้ Show_bmi ต้องทำเป็น String ใช้คำสั่ง toString กำหนดทศนิยมใช้ AsFixed() ก่อนถึงจะแสดงผลลัพธ์ได้
+                    Show_bmi = bmi.toStringAsFixed(2); // แสดงผลลัพธ์ BMI 2 ตำแหน่งทศนิยม
+                    if (bmi < 18.5) {
+                      Show_result = 'น้ำหนักน้อย / ผอม';
+                    } else if (bmi < 22.9) {
+                      Show_result = 'น้ำหนักปกติ / สมส่วน';
+                    } else if (bmi < 24.9) {
+                      Show_result = 'น้ำหนักเกิน';
+                    } else if (bmi < 29.9) {
+                      Show_result = 'โรคอ้วนระดับ 1';
+                    } else {
+                      Show_result = 'โรคอ้วนระดับ 2';
+                    }
+                  });
+                },
                 style: ElevatedButton.styleFrom(
                   fixedSize: Size(MediaQuery.of(context).size.width, 60),
                   backgroundColor: Colors.deepOrange,
@@ -103,7 +147,15 @@ class _BmiUIState extends State<BmiUI> {
               SizedBox(height: 15),
               // ปุ่มรีเซ็ต
               ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  // ล้างค่าที่ผู้ใช้กรอกและรีเซ็ตผลลัพธ์
+                  setState(() {
+                    weightController.clear();
+                    heightController.clear();
+                    Show_bmi = '0.00';
+                    Show_result = 'การแปลผล';
+                  });
+                },
                 style: ElevatedButton.styleFrom(
                   fixedSize: Size(MediaQuery.of(context).size.width, 60),
                   backgroundColor: Colors.grey,
@@ -122,10 +174,10 @@ class _BmiUIState extends State<BmiUI> {
                 width: MediaQuery.of(context).size.width,
                 height:
                     150, // เพิ่มความสูงเพื่อให้มีพื้นที่พอสำหรับข้อความ 3 บรรทัด
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   color: Color(0xFFCDE4CE), // พื้นหลังสีเขียวอ่อน
                 ),
-                child: const Center(
+                child: Center(
                   child: Column(
                     mainAxisAlignment:
                         MainAxisAlignment.center, // จัดให้อยู่กึ่งกลางแนวตั้ง
@@ -133,13 +185,14 @@ class _BmiUIState extends State<BmiUI> {
                       Text(
                         'BMI',
                         style: TextStyle(
-                          fontSize: 14, color: Colors.black,
+                          fontSize: 14,
+                          color: Colors.black,
                           fontWeight: FontWeight.bold,
-                          ),
+                        ),
                       ),
                       SizedBox(height: 4),
                       Text(
-                        '0.00',
+                        Show_bmi, // แสดงค่าดัชนีมวลกาย
                         style: TextStyle(
                           fontSize: 40,
                           fontWeight: FontWeight.bold,
@@ -148,9 +201,10 @@ class _BmiUIState extends State<BmiUI> {
                       ),
                       SizedBox(height: 4),
                       Text(
-                        'การแปลผล',
+                        Show_result, // แสดงผลลัพธ์การแปลผล
                         style: TextStyle(
-                          fontSize: 14, color: Colors.black,
+                          fontSize: 14,
+                          color: Colors.black,
                           fontWeight: FontWeight.bold,
                         ),
                       ),

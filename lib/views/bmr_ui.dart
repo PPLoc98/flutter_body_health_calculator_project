@@ -9,14 +9,16 @@ class BmrUI extends StatefulWidget {
 }
 
 class _BmrUIState extends State<BmrUI> {
-// สร้างตัวแปรเก็บ index ของรายการที่เลือก
+// สร้างตัวแปรเก็บ index ของรายการที่เลือกเพศ โดยเริ่มต้นเป็น 0 (ชาย)
   int _SexIndex = 0;
 
-  // สร้างตัวแปรแบบ List คือ ตัวแปร 1 ตัวเก็บได้มากกว่า 1 ข้อมูลเหมือน Array
-  //List subSexShow = [
-    //M(),
-    // F(),
-  //];
+  // สร้างตัวแปรสำหรับ TextField เพื่อเช็คผู้ใช้กรอกข้อมูลหรือไม่
+  TextEditingController weightController = TextEditingController();
+  TextEditingController heightController = TextEditingController();
+  TextEditingController ageController = TextEditingController();
+
+  // ฟังก์ชันคำนวณ BMR 
+  String Show_bmr = '0.00';
 
   @override
   Widget build(BuildContext context) {
@@ -65,11 +67,11 @@ class _BmrUIState extends State<BmrUI> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'เพศ',
                       style: TextStyle(fontSize: 15),
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: 8),
                     // ใช้ Row เพื่อวางปุ่มชายและหญิงในแนวนอน
                     Row(
                       children: [
@@ -85,13 +87,13 @@ class _BmrUIState extends State<BmrUI> {
                             },
                             style: ElevatedButton.styleFrom(
                               minimumSize:
-                                  const Size(50, 60), // ความสูง*กว้างกล่อง
+                                  Size(50, 60), // ความสูง*กว้างกล่อง
                               // กำหนดสีพื้นหลังและสีตัวอักษรตามเงื่อนไขเมื่อเลือกเพศชายหรือหญิง
                               backgroundColor: _SexIndex == 0
-                                  ? const Color(0xFFC4E0F9)
+                                  ? Color(0xFFC4E0F9)
                                   : Colors.white,
                               foregroundColor: _SexIndex == 0
-                                  ? const Color(0xFF1A56B8)
+                                  ? Color(0xFF1A56B8)
                                   : Colors.black87,
                               elevation: 2, // เพิ่มเงา
                               shape: RoundedRectangleBorder(
@@ -99,7 +101,7 @@ class _BmrUIState extends State<BmrUI> {
                                     BorderRadius.circular(10), // ขอบมน
                               ),
                             ),
-                            child: const Text(
+                            child: Text(
                               'ชาย',
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
@@ -108,7 +110,7 @@ class _BmrUIState extends State<BmrUI> {
                             ),
                           ),
                         ),
-                        const SizedBox(width: 20), // ระยะห่างระหว่างปุ่ม
+                        SizedBox(width: 20), // ระยะห่างระหว่างปุ่ม
                         // ปุ่มหญิง (ใช้ ElevatedButton)
                         Expanded(
                           child: ElevatedButton(
@@ -120,21 +122,21 @@ class _BmrUIState extends State<BmrUI> {
                             },
                             style: ElevatedButton.styleFrom(
                               minimumSize:
-                                  const Size(50, 60), // ความสูง*กว้างกล่อง
+                                  Size(50, 60), // ความสูง*กว้างกล่อง
                               // กำหนดสีพื้นหลังและสีตัวอักษรตามเงื่อนไขเมื่อเลือกเพศชายหรือหญิง
                               backgroundColor: _SexIndex == 1
-                                  ? const Color(0xFFC4E0F9)
+                                  ? Color(0xFFC4E0F9)
                                   : Colors.white,
                               foregroundColor: _SexIndex == 1
-                                  ? const Color(0xFF1A56B8)
+                                  ? Color(0xFF1A56B8)
                                   : Colors.black87,
                               elevation: 2, // เพิ่มเงา
-                              padding: const EdgeInsets.symmetric(vertical: 20),
+                              padding: EdgeInsets.symmetric(vertical: 20),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),
                               ),
                             ),
-                            child: const Text(
+                            child: Text(
                               'หญิง',
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
@@ -152,18 +154,19 @@ class _BmrUIState extends State<BmrUI> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'น้ำหนัก (kg.)',
                       style: TextStyle(fontSize: 15),
                     ),
-                    const SizedBox(height: 5),
+                    SizedBox(height: 5),
                     TextField(
+                      controller: weightController, // TextField > weightController น้ำหนัก
                       keyboardType: TextInputType.number, // เปิดคีย์บอร์ดตัวเลข
                       inputFormatters: [
                         FilteringTextInputFormatter
                             .digitsOnly, // บังคับให้พิมพ์ได้เฉพาะตัวเลข 0-9 เท่านั้น
                       ],
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         hintText: 'กรอกน้ำหนักของคุณ',
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.all(Radius.circular(8))),
@@ -176,18 +179,19 @@ class _BmrUIState extends State<BmrUI> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'ส่วนสูง (cm.)',
                       style: TextStyle(fontSize: 15),
                     ),
-                    const SizedBox(height: 5),
+                    SizedBox(height: 5),
                     TextField(
+                      controller: heightController, // TextField > heightController ส่วนสูง
                       keyboardType: TextInputType.number, // เปิดคีย์บอร์ดตัวเลข
                       inputFormatters: [
                         FilteringTextInputFormatter
                             .digitsOnly, // บังคับให้พิมพ์ได้เฉพาะตัวเลข 0-9 เท่านั้น
                       ],
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         hintText: 'กรอกส่วนสูงของคุณ',
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.all(Radius.circular(8))),
@@ -200,18 +204,19 @@ class _BmrUIState extends State<BmrUI> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'อายุ (ปี)',
                       style: TextStyle(fontSize: 15),
                     ),
-                    const SizedBox(height: 5),
+                    SizedBox(height: 5),
                     TextField(
+                      controller: ageController, // TextField > ageController อายุ
                       keyboardType: TextInputType.number, // เปิดคีย์บอร์ดตัวเลข
                       inputFormatters: [
                         FilteringTextInputFormatter
                             .digitsOnly, // บังคับให้พิมพ์ได้เฉพาะตัวเลข 0-9 เท่านั้น
                       ],
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         hintText: 'กรอกอายุของคุณ',
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.all(Radius.circular(8))),
@@ -222,7 +227,38 @@ class _BmrUIState extends State<BmrUI> {
                 SizedBox(height: 30),
                 // ปุ่มคำนวณ BMR
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    // validate input ตรวจสอบว่าผู้ใช้กรอกข้อมูลหรือไม่
+                    if (weightController.text.isEmpty || heightController.text.isEmpty ||
+                        ageController.text.isEmpty) {
+                      //ใช้ SnackBar แสดงข้อความแจ้งเตือน
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text('กรุณากรอกน้ำหนัก ส่วนสูง และอายุ!'),
+                        backgroundColor: Colors.red,
+                        duration: Duration(seconds: 2),
+                      ));
+                      return; // ออกจากฟังก์ชัน
+                    } else {
+                      // ดึงค่าที่ผู้ใช้ใน TextField มาแปลงเป็น double
+                      double weight = double.parse(weightController.text);
+                      double height = double.parse(heightController.text);
+                      int age = int.parse(ageController.text);
+
+                      // คำนวณ BMR ตามสูตรของ Harris-Benedict
+                      double bmr;
+                      if (_SexIndex == 0) {
+                        // สำหรับเพศชาย
+                        bmr = 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age);
+                      } else {
+                        // สำหรับเพศหญิง
+                        bmr = 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age);
+                      }
+                        // แสดงผลลัพธ์ BMR โดยใช้ setState เพื่ออัปเดต UI
+                      setState(() {
+                        Show_bmr = bmr.toStringAsFixed(2); // แสดงผลลัพธ์ BMR
+                      });
+                    }
+                  },
                   style: ElevatedButton.styleFrom(
                     fixedSize: Size(MediaQuery.of(context).size.width, 60),
                     backgroundColor: Colors.deepOrange,
@@ -230,7 +266,7 @@ class _BmrUIState extends State<BmrUI> {
                       borderRadius: BorderRadius.circular(30),
                     ),
                   ),
-                  child: const Text(
+                  child: Text(
                     // เติม const เพื่อลบ warning
                     'คำนวณ BMR',
                     style: TextStyle(color: Colors.white, fontSize: 18),
@@ -239,7 +275,16 @@ class _BmrUIState extends State<BmrUI> {
                 SizedBox(height: 15),
                 // ปุ่มรีเซ็ต
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    // ล้างค่าที่ผู้ใช้กรอกและรีเซ็ตผลลัพธ์
+                    setState(() {
+                      weightController.clear();
+                      heightController.clear();
+                      ageController.clear();
+                      Show_bmr = '0.00';
+                      _SexIndex = 0;
+                    });
+                  },
                   style: ElevatedButton.styleFrom(
                     fixedSize: Size(MediaQuery.of(context).size.width, 60),
                     backgroundColor: Colors.grey,
@@ -247,7 +292,7 @@ class _BmrUIState extends State<BmrUI> {
                       borderRadius: BorderRadius.circular(30),
                     ),
                   ),
-                  child: const Text(
+                  child: Text(
                     // เติม const เพื่อลบ warning
                     'ล้างข้อมูล',
                     style: TextStyle(color: Colors.white, fontSize: 18),
@@ -259,10 +304,10 @@ class _BmrUIState extends State<BmrUI> {
                   width: MediaQuery.of(context).size.width,
                   height:
                       150, // เพิ่มความสูงเพื่อให้มีพื้นที่พอสำหรับข้อความ 3 บรรทัด
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     color: Color(0xFFCDE4CE), // พื้นหลังสีเขียวอ่อน
                   ),
-                  child: const Center(
+                  child: Center(
                     child: Column(
                       mainAxisAlignment:
                           MainAxisAlignment.center, // จัดให้อยู่กึ่งกลางแนวตั้ง
@@ -277,7 +322,7 @@ class _BmrUIState extends State<BmrUI> {
                         ),
                         SizedBox(height: 4),
                         Text(
-                          '0.00',
+                          Show_bmr, // แสดงผลลัพธ์ BMR
                           style: TextStyle(
                             fontSize: 40,
                             fontWeight: FontWeight.bold,

@@ -31,7 +31,7 @@ class _HomeUIState extends State<HomeUI> {
       appBar: AppBar(
         backgroundColor: Colors.deepOrange,
         title: Text(
-          'Body ว้าว',
+          'Body Health Calculator',
           style: TextStyle(
             color: Colors.white,
           ),
